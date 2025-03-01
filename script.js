@@ -12,12 +12,9 @@ document.body.appendChild(renderer.domElement);
 const light = new THREE.AmbientLight(0xffffff, 1);
 scene.add(light);
 
-// 3D Room and Jewelry
+// Load 3D Jewelry Model
 const loader = new GLTFLoader();
-loader.load('room1.glb', function (gltf) {
-    scene.add(gltf.scene);
-});
-loader.load('jewelry1.glb', function (gltf) {
+loader.load('assets/KNITRENDER.glb', function (gltf) {
     const jewelry = gltf.scene;
     jewelry.position.set(0, 1, 0);
     scene.add(jewelry);
