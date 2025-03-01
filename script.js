@@ -18,7 +18,7 @@ scene.add(directionalLight);
 
 // Load 3D Jewelry Model from GitHub root directory
 const loader = new GLTFLoader();
-loader.load('KNITRENDER.glb', function (gltf) {
+loader.load('https://your-username.github.io/your-repo/KNITRENDER.glb', function (gltf) {
     const jewelry = gltf.scene;
     jewelry.position.set(0, 1, 0);
     scene.add(jewelry);
