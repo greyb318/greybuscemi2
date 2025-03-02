@@ -6,14 +6,66 @@
     <title>Jewelry Showcase</title>
     <style>
         body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-    <!-- Include THREE.js & GLTFLoader -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js"></script>
-    <script src="script.js"></script>
+    <!-- Import Three.js as an ES Module -->
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
+        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js';
+
+        // Initialize the scene and camera
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(5, 10, 5);
+        scene.add(directionalLight);
+
+        // Load the 3D model
+        const loader = new GLTFLoader();
+        loader.load(
+            'https://greyb318.github.io/greybuscemi2/KNITRENDER.glb',
+            function (gltf) {
+                console.log("Model loaded successfully!");
+                const jewelry = gltf.scene;
+                jewelry.position.set(0, 1, 0);
+                scene.add(jewelry);
+
+                // Animation loop
+                function animate() {
+                    requestAnimationFrame(animate);
+                    jewelry.rotation.y += 0.01; // Rotate
+                    jewelry.position.y = 1 + Math.sin(Date.now() * 0.002) * 0.2; // Floating effect
+                    renderer.render(scene, camera);
+                }
+                animate();
+            },
+            undefined,
+            function (error) {
+                console.error("Error loading model:", error);
+            }
+        );
+
+        // Set camera position
+        camera.position.set(0, 1, 5);
+
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 
 </body>
 </html>
