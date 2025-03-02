@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <!-- Import Three.js as an ES Module -->
+    <!-- Import Three.js and GLTFLoader as ES Modules -->
     <script type="module">
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
         import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js';
@@ -34,7 +34,7 @@
         // Load the 3D model
         const loader = new GLTFLoader();
         loader.load(
-            'https://greyb318.github.io/greybuscemi2/KNITRENDER.glb',
+            'https://greyb318.github.io/greybuscemi2/KNITRENDER.glb', // Replace with your actual URL
             function (gltf) {
                 console.log("Model loaded successfully!");
                 const jewelry = gltf.scene;
