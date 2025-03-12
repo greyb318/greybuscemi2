@@ -17,8 +17,8 @@
 		<script type="importmap">
 			{
 				"imports": {
-					"three": "../build/three.module.js",
-					"three/addons/": "./jsm/"
+					"three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+					"three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
 				}
 			}
 		</script>
@@ -52,7 +52,7 @@
 				container.appendChild( renderer.domElement );
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
-				camera.position.set( 0, 100, 0 );
+				camera.position.set( 0, 100, 400 );
 
 				const environment = new RoomEnvironment();
 				const pmremGenerator = new THREE.PMREMGenerator( renderer );
@@ -69,13 +69,13 @@
 				scene.add( grid );
 
 				const ktx2Loader = new KTX2Loader()
-					.setTranscoderPath( 'jsm/libs/basis/' )
+					.setTranscoderPath( 'https://unpkg.com/three@0.162.0/examples/jsm/libs/basis/' )
 					.detectSupport( renderer );
 
-				const loader = new GLTFLoader().setPath( 'models/gltf/' );
+				const loader = new GLTFLoader();
 				loader.setKTX2Loader( ktx2Loader );
 				loader.setMeshoptDecoder( MeshoptDecoder );
-				loader.load( 'KNITWEBSITETEST2.glb', function ( gltf ) {
+				loader.load( './KNITWEBSITETEST2.glb', function ( gltf ) {
 
 					// coffeemat.glb was produced from the source scene using gltfpack:
 					// gltfpack -i coffeemat/scene.gltf -o coffeemat.glb -cc -tc
@@ -87,11 +87,13 @@
 
 					render();
 
+				}, undefined, function ( error ) {
+					console.error( 'An error occurred loading the model:', error );
 				} );
 
 				const controls = new OrbitControls( camera, renderer.domElement );
 				controls.addEventListener( 'change', render ); // use if there is no animation loop
-				controls.minDistance = 400;
+				controls.minDistance = 200;
 				controls.maxDistance = 1000;
 				controls.target.set( 10, 90, - 16 );
 				controls.update();
