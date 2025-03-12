@@ -36,7 +36,7 @@
 			import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 			import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
-			let camera, scene, renderer;
+			let camera, scene, renderer, controls;
 
 			init();
 			render();
@@ -54,17 +54,17 @@
 				container.appendChild( renderer.domElement );
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 5000 );
-				camera.position.set( 0, 200, 800 );
+				camera.position.set( 0, 50, 100 );
 
 				const environment = new RoomEnvironment();
 				const pmremGenerator = new THREE.PMREMGenerator( renderer );
 
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0xbbbbbb );
+				scene.background = new THREE.Color( 0x000000 );  // Black background
 				scene.environment = pmremGenerator.fromScene( environment ).texture;
 				environment.dispose();
 
-				const grid = new THREE.GridHelper( 1000, 20, 0xffffff, 0xffffff );
+				const grid = new THREE.GridHelper( 1000, 20, 0x444444, 0x444444 );
 				grid.material.opacity = 0.5;
 				grid.material.depthWrite = false;
 				grid.material.transparent = true;
@@ -84,36 +84,46 @@
 				const loader = new GLTFLoader(loadingManager);
 				loader.setKTX2Loader( ktx2Loader );
 				loader.setMeshoptDecoder( MeshoptDecoder );
-				loader.load( './KNITWEBSITETEST2.glb', function ( gltf ) {
+				loader.load( './KNITWEBSITETEST.glb', function ( gltf ) {
 
 					const model = gltf.scene;
 					
 					// Scale up the model
-					model.scale.set(3, 3, 3);
+					model.scale.set(10, 10, 10);
 					
 					// Center the model
 					const box = new THREE.Box3().setFromObject(model);
 					const center = box.getCenter(new THREE.Vector3());
+					
+					// Position the model so it's centered and slightly above the grid
 					model.position.x = -center.x;
 					model.position.z = -center.z;
-					model.position.y = 0;  // Place it on the grid
+					model.position.y = 0;
 
 					scene.add(model);
 
-					// Adjust camera to fit model
+					// Get model dimensions
 					const boundingBox = new THREE.Box3().setFromObject(model);
 					const size = boundingBox.getSize(new THREE.Vector3());
-					const distance = Math.max(size.x, size.y, size.z) * 2;
+					
+					// Set up camera and controls target based on model center
+					const distance = Math.max(size.x, size.y, size.z) * 1.5;
 					camera.position.set(distance, distance/2, distance);
-					camera.lookAt(center);
+					
+					controls.target.set(0, size.y/4, 0);  // Set rotation point to 1/4 up the model's height
+					controls.update();
+					
+					camera.lookAt(new THREE.Vector3(0, size.y/4, 0));
 
 					render();
 
 				}, 
 				// Progress callback
 				function ( xhr ) {
-					const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
-					document.getElementById('info').innerHTML = `Loading: ${percent}%`;
+					if (xhr.lengthComputable) {
+						const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+						document.getElementById('info').innerHTML = `Loading: ${percent}%`;
+					}
 				},
 				function ( error ) {
 					console.error( 'An error occurred loading the model:', error );
@@ -121,11 +131,12 @@
 					document.getElementById('loading').style.display = 'none';
 				} );
 
-				const controls = new OrbitControls( camera, renderer.domElement );
+				controls = new OrbitControls( camera, renderer.domElement );
 				controls.addEventListener( 'change', render );
-				controls.minDistance = 100;
-				controls.maxDistance = 2000;
-				controls.target.set( 0, 100, 0 );
+				controls.enableDamping = true;  // Add smooth damping to controls
+				controls.dampingFactor = 0.05;
+				controls.minDistance = 50;
+				controls.maxDistance = 1000;
 				controls.update();
 
 				window.addEventListener( 'resize', onWindowResize );

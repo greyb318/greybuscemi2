@@ -1,7 +1,7 @@
 body {
 	margin: 0;
-	background-color: #bbbbbb;
-	color: #fff;
+	background-color: #000000;
+	color: #ffffff;
 	font-family: Monospace;
 	font-size: 13px;
 	line-height: 24px;
@@ -9,7 +9,7 @@ body {
 }
 
 a {
-	color: #ff0;
+	color: #2196F3;
 	text-decoration: none;
 }
 
@@ -30,6 +30,7 @@ a:hover {
 	user-select: none;
 	pointer-events: none;
 	z-index: 1;
+	text-shadow: 0 0 3px #000;
 }
 
 canvas {
@@ -47,8 +48,8 @@ canvas {
 .spinner {
 	width: 50px;
 	height: 50px;
-	border: 5px solid #f3f3f3;
-	border-top: 5px solid #3498db;
+	border: 5px solid #333333;
+	border-top: 5px solid #2196F3;
 	border-radius: 50%;
 	animation: spin 1s linear infinite;
 }
