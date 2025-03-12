@@ -9,9 +9,11 @@
 
 	<body>
 		<div id="info">
-			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - GLTFLoader + compression extensions<br />
-			<a href="https://sketchfab.com/3d-models/coffeemat-7fb196a40a6e4697aad9ca2f75c8b33d" target="_blank" rel="noopener">Coffeemat</a> by
-			<a href="https://sketchfab.com/OFFcours1" target="_blank" rel="noopener">Roman Red</a>
+			Loading 3D Model...
+		</div>
+
+		<div id="loading">
+			<div class="spinner"></div>
 		</div>
 
 		<script type="importmap">
@@ -51,8 +53,8 @@
 				renderer.toneMappingExposure = 1;
 				container.appendChild( renderer.domElement );
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
-				camera.position.set( 0, 100, 400 );
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 5000 );
+				camera.position.set( 0, 200, 800 );
 
 				const environment = new RoomEnvironment();
 				const pmremGenerator = new THREE.PMREMGenerator( renderer );
@@ -62,7 +64,7 @@
 				scene.environment = pmremGenerator.fromScene( environment ).texture;
 				environment.dispose();
 
-				const grid = new THREE.GridHelper( 500, 10, 0xffffff, 0xffffff );
+				const grid = new THREE.GridHelper( 1000, 20, 0xffffff, 0xffffff );
 				grid.material.opacity = 0.5;
 				grid.material.depthWrite = false;
 				grid.material.transparent = true;
@@ -72,30 +74,58 @@
 					.setTranscoderPath( 'https://unpkg.com/three@0.162.0/examples/jsm/libs/basis/' )
 					.detectSupport( renderer );
 
-				const loader = new GLTFLoader();
+				// Add loading manager
+				const loadingManager = new THREE.LoadingManager();
+				loadingManager.onLoad = function() {
+					document.getElementById('loading').style.display = 'none';
+					document.getElementById('info').innerHTML = 'Click and drag to rotate. Scroll to zoom.';
+				};
+
+				const loader = new GLTFLoader(loadingManager);
 				loader.setKTX2Loader( ktx2Loader );
 				loader.setMeshoptDecoder( MeshoptDecoder );
 				loader.load( './KNITWEBSITETEST2.glb', function ( gltf ) {
 
-					// coffeemat.glb was produced from the source scene using gltfpack:
-					// gltfpack -i coffeemat/scene.gltf -o coffeemat.glb -cc -tc
-					// The resulting model uses EXT_meshopt_compression (for geometry) and KHR_texture_basisu (for texture compression using ETC1S/BasisLZ)
+					const model = gltf.scene;
+					
+					// Scale up the model
+					model.scale.set(3, 3, 3);
+					
+					// Center the model
+					const box = new THREE.Box3().setFromObject(model);
+					const center = box.getCenter(new THREE.Vector3());
+					model.position.x = -center.x;
+					model.position.z = -center.z;
+					model.position.y = 0;  // Place it on the grid
 
-					gltf.scene.position.y = 8;
+					scene.add(model);
 
-					scene.add( gltf.scene );
+					// Adjust camera to fit model
+					const boundingBox = new THREE.Box3().setFromObject(model);
+					const size = boundingBox.getSize(new THREE.Vector3());
+					const distance = Math.max(size.x, size.y, size.z) * 2;
+					camera.position.set(distance, distance/2, distance);
+					camera.lookAt(center);
 
 					render();
 
-				}, undefined, function ( error ) {
+				}, 
+				// Progress callback
+				function ( xhr ) {
+					const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+					document.getElementById('info').innerHTML = `Loading: ${percent}%`;
+				},
+				function ( error ) {
 					console.error( 'An error occurred loading the model:', error );
+					document.getElementById('info').innerHTML = 'Error loading model';
+					document.getElementById('loading').style.display = 'none';
 				} );
 
 				const controls = new OrbitControls( camera, renderer.domElement );
-				controls.addEventListener( 'change', render ); // use if there is no animation loop
-				controls.minDistance = 200;
-				controls.maxDistance = 1000;
-				controls.target.set( 10, 90, - 16 );
+				controls.addEventListener( 'change', render );
+				controls.minDistance = 100;
+				controls.maxDistance = 2000;
+				controls.target.set( 0, 100, 0 );
 				controls.update();
 
 				window.addEventListener( 'resize', onWindowResize );
@@ -103,22 +133,14 @@
 			}
 
 			function onWindowResize() {
-
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
-
 				renderer.setSize( window.innerWidth, window.innerHeight );
-
 				render();
-
 			}
 
-			//
-
 			function render() {
-
 				renderer.render( scene, camera );
-
 			}
 
 		</script>
